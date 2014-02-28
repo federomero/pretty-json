@@ -1,0 +1,10 @@
+'menu': [
+  'label': 'Packages'
+  'submenu': [
+    'label': 'Prettify JSON'
+    'submenu': [
+      'label': 'Prettify'
+      'command': 'prettify-json:prettify'
+    ]
+  ]
+]
