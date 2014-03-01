@@ -1,3 +1,17 @@
 {
-  "main": "./index.coffee"
+  "main": "./index.coffee",
+  "name": "pretty-json",
+  "version": "0.1.0",
+  "description": "Format JSON",
+  "keywords": [
+    "JSON",
+    "format",
+    "pretty",
+    "prettify"
+  ],
+  "repository": "https://github.com/federomero/pretty-json",
+  "license": "MIT",
+  "engines": {
+    "atom": "*"
+  }
 }
