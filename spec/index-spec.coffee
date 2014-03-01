@@ -1,14 +1,14 @@
 {WorkspaceView} = require 'atom'
 
-describe "prettify json", ->
+describe "pretty json", ->
   [editor, editorView] = []
 
   prettify = (callback) ->
-    editorView.trigger "prettify-json:prettify"
+    editorView.trigger "pretty-json:prettify"
     runs(callback)
 
   beforeEach ->
-    waitsForPromise -> atom.packages.activatePackage('prettify-json')
+    waitsForPromise -> atom.packages.activatePackage('pretty-json')
     waitsForPromise -> atom.packages.activatePackage('language-json')
 
     atom.workspaceView = new WorkspaceView

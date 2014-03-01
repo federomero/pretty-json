@@ -22,6 +22,6 @@ formatter = (text) ->
 
 module.exports =
   activate: ->
-    atom.workspaceView.command 'prettify-json:prettify', '.editor', ->
+    atom.workspaceView.command 'pretty-json:prettify', '.editor', ->
       editor = atom.workspaceView.getActivePaneItem()
       prettify(editor)

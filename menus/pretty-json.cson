@@ -1,10 +1,10 @@
 'menu': [
   'label': 'Packages'
   'submenu': [
-    'label': 'Prettify JSON'
+    'label': 'Pretty JSON'
     'submenu': [
       'label': 'Prettify'
-      'command': 'prettify-json:prettify'
+      'command': 'pretty-json:prettify'
     ]
   ]
 ]
