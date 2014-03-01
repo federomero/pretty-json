@@ -1,21 +1,21 @@
 {WorkspaceView} = require 'atom'
 
 describe "prettify json", ->
-  [activationPromise, editor, editorView] = []
+  [editor, editorView] = []
 
   prettify = (callback) ->
     editorView.trigger "prettify-json:prettify"
-    waitsForPromise -> activationPromise
     runs(callback)
 
   beforeEach ->
+    waitsForPromise -> atom.packages.activatePackage('prettify-json')
+    waitsForPromise -> atom.packages.activatePackage('language-json')
+
     atom.workspaceView = new WorkspaceView
     atom.workspaceView.openSync()
 
     editorView = atom.workspaceView.getActiveView()
     editor = editorView.getEditor()
-
-    activationPromise = atom.packages.activatePackage('prettify-json')
 
   describe "when no text is selected", ->
     it "doesn't change anything", ->
@@ -24,7 +24,6 @@ describe "prettify json", ->
         { "a": "b", "c": "d" }
         End
       """
-      editor.setCursorBufferPosition([0, 0])
 
       prettify ->
         expect(editor.getText()).toBe """
@@ -32,7 +31,6 @@ describe "prettify json", ->
           { "a": "b", "c": "d" }
           End
         """
-
 
   describe "when a valid json text is selected", ->
     it "formats it correctly", ->
@@ -68,3 +66,32 @@ describe "prettify json", ->
           {]
           End
         """
+
+  describe "JSON file", ->
+    beforeEach ->
+      editor.setGrammar(atom.syntax.selectGrammar('test.json'))
+
+    describe "with invalid JSON", ->
+      it "doesn't change anything", ->
+        editor.setText """
+          {]
+        """
+
+        prettify ->
+          expect(editor.getText()).toBe """
+            {]
+          """
+
+    describe "with valid JSON", ->
+      it "formats the whole file correctly", ->
+        editor.setText """
+          { "a": "b", "c": "d" }
+        """
+
+        prettify ->
+          expect(editor.getText()).toBe """
+            {
+              "a": "b",
+              "c": "d"
+            }
+          """

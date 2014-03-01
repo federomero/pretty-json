@@ -1,6 +1,13 @@
 prettify = (editor) ->
-  text = editor.getSelectedText()
+  wholeFile = editor.getGrammar().name == 'JSON'
 
+  if wholeFile
+    text = editor.getText()
+    editor.setText(formatter(text))
+  else
+    text = editor.replaceSelectedText({}, formatter)
+
+formatter = (text) ->
   editorSettings = atom.config.getSettings().editor
   if editorSettings.softTabs?
     space = Array(editorSettings.tabLength + 1).join(" ")
@@ -9,11 +16,9 @@ prettify = (editor) ->
 
   try
     parsed = JSON.parse(text)
-    result = JSON.stringify(parsed, null, space)
+    JSON.stringify(parsed, null, space)
   catch error
-    result = text
-
-  editor.setTextInBufferRange(editor.getSelectedBufferRange(), result);
+    text
 
 module.exports =
   activate: ->
