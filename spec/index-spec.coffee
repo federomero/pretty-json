@@ -7,6 +7,10 @@ describe "pretty json", ->
     editorView.trigger "pretty-json:prettify"
     runs(callback)
 
+  sortedPrettify = (callback) ->
+    editorView.trigger "pretty-json:sort-and-prettify"
+    runs(callback)
+
   beforeEach ->
     waitsForPromise -> atom.packages.activatePackage('pretty-json')
     waitsForPromise -> atom.packages.activatePackage('language-json')
@@ -95,3 +99,32 @@ describe "pretty json", ->
               "c": "d"
             }
           """
+
+    describe "Sort and prettify", ->
+      beforeEach ->
+        editor.setGrammar(atom.syntax.selectGrammar('test.json'))
+
+      describe "with invalid JSON", ->
+        it "doesn't change anything", ->
+          editor.setText """
+            {]
+          """
+
+          sortedPrettify ->
+            expect(editor.getText()).toBe """
+              {]
+            """
+
+      describe "with valid JSON", ->
+        it "formats the whole file correctly", ->
+          editor.setText """
+            { "c": "d", "a": "b" }
+          """
+
+          sortedPrettify ->
+            expect(editor.getText()).toBe """
+              {
+                "a": "b",
+                "c": "d"
+              }
+            """

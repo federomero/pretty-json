@@ -1,13 +1,17 @@
-prettify = (editor) ->
+stringify = require("json-stable-stringify")
+
+prettify = (editor, sorted) ->
   wholeFile = editor.getGrammar().name == 'JSON'
 
   if wholeFile
     text = editor.getText()
-    editor.setText(formatter(text))
+    editor.setText(formatter(text, sorted))
   else
-    text = editor.replaceSelectedText({}, formatter)
+    text = editor.replaceSelectedText({}, (text) ->
+      formatter(text, sorted)
+    )
 
-formatter = (text) ->
+formatter = (text, sorted) ->
   editorSettings = atom.config.getSettings().editor
   if editorSettings.softTabs?
     space = Array(editorSettings.tabLength + 1).join(" ")
@@ -16,7 +20,10 @@ formatter = (text) ->
 
   try
     parsed = JSON.parse(text)
-    JSON.stringify(parsed, null, space)
+    if sorted
+      return stringify(parsed, { space: space })
+    else
+      return JSON.stringify(parsed, null, space)
   catch error
     text
 
@@ -25,3 +32,6 @@ module.exports =
     atom.workspaceView.command 'pretty-json:prettify', '.editor', ->
       editor = atom.workspaceView.getActivePaneItem()
       prettify(editor)
+    atom.workspaceView.command 'pretty-json:sort-and-prettify', '.editor', ->
+      editor = atom.workspaceView.getActivePaneItem()
+      prettify(editor, true)
