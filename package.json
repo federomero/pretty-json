@@ -13,5 +13,8 @@
   "license": "MIT",
   "engines": {
     "atom": "*"
+  },
+  "dependencies": {
+    "json-stable-stringify": "~0.1.1"
   }
 }
