@@ -30,8 +30,8 @@ formatter = (text, sorted) ->
 module.exports =
   activate: ->
     atom.workspaceView.command 'pretty-json:prettify', '.editor', ->
-      editor = atom.workspaceView.getActivePaneItem()
+      editor = atom.workspace.getActiveEditor()
       prettify(editor)
     atom.workspaceView.command 'pretty-json:sort-and-prettify', '.editor', ->
-      editor = atom.workspaceView.getActivePaneItem()
+      editor = atom.workspace.getActiveEditor()
       prettify(editor, true)
