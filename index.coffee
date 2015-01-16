@@ -12,7 +12,7 @@ prettify = (editor, sorted) ->
     )
 
 formatter = (text, sorted) ->
-  editorSettings = atom.config.getSettings().editor
+  editorSettings = atom.config.get('editor')
   if editorSettings.softTabs?
     space = Array(editorSettings.tabLength + 1).join(" ")
   else
