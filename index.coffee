@@ -31,8 +31,8 @@ module.exports =
   activate: ->
     atom.commands.add 'atom-workspace',
       'pretty-json:prettify': ->
-        editor = atom.workspace.getActiveEditor()
+        editor = atom.workspace.getActiveTextEditor()
         prettify(editor)
       'pretty-json:sort-and-prettify': ->
-        editor = atom.workspace.getActiveEditor()
+        editor = atom.workspace.getActiveTextEditor()
         prettify(editor, true)
