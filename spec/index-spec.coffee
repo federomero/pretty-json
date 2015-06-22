@@ -7,6 +7,10 @@ describe "pretty json", ->
     editorView.trigger "pretty-json:prettify"
     runs(callback)
 
+  minify = (callback) ->
+    editorView.trigger "pretty-json:minify"
+    runs(callback)
+
   sortedPrettify = (callback) ->
     editorView.trigger "pretty-json:sort-and-prettify"
     runs(callback)
@@ -128,3 +132,55 @@ describe "pretty json", ->
                 "c": "d"
               }
             """
+
+  describe "Minify JSON file", ->
+    beforeEach ->
+      editor.setGrammar(atom.syntax.selectGrammar('test.json'))
+
+    it "Returns same string from invalid JSON", ->
+      editor.setText """
+        {
+          [
+        }
+      """
+
+      minify ->
+        expect(editor.getText()).toBe """
+          {
+            [
+          }
+        """
+
+    it "Minifies valid JSON", ->
+      editor.setText """
+        {
+          "a": "b",
+          "c": "d",
+          "num": 123
+        }
+      """
+
+      minify ->
+        expect(editor.getText()).toBe """
+          {"a":"b","c":"d","num":123}
+        """
+
+  describe "Minify selected JSON", ->
+    it "Minifies JSON data", ->
+      editor.setText """
+        Start
+        {
+          "a": "b",
+          "c": "d",
+          "num": 123
+        }
+        End
+      """
+      editor.setSelectedBufferRange([[1,0], [5, 1]])
+
+      minify ->
+        expect(editor.getText()).toBe """
+          Start
+          {"a":"b","c":"d","num":123}
+          End
+        """

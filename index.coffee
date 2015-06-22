@@ -1,17 +1,30 @@
 stringify = require("json-stable-stringify")
+uglify = require("jsonminify")
+formatter = {}
 
 prettify = (editor, sorted) ->
   wholeFile = editor.getGrammar().name == 'JSON'
 
   if wholeFile
     text = editor.getText()
-    editor.setText(formatter(text, sorted))
+    editor.setText(formatter.pretty(text, sorted))
   else
     text = editor.replaceSelectedText({}, (text) ->
-      formatter(text, sorted)
+      formatter.pretty(text, sorted)
     )
 
-formatter = (text, sorted) ->
+minify = (editor, sorted) ->
+  wholeFile = editor.getGrammar().name == 'JSON'
+
+  if wholeFile
+    text = editor.getText()
+    editor.setText(formatter.minify(text))
+  else
+    text = editor.replaceSelectedText({}, (text) ->
+      formatter.minify(text);
+    )
+
+formatter.pretty = (text, sorted) ->
   editorSettings = atom.config.get('editor')
   if editorSettings.softTabs?
     space = Array(editorSettings.tabLength + 1).join(" ")
@@ -27,6 +40,13 @@ formatter = (text, sorted) ->
   catch error
     text
 
+formatter.minify = (text) ->
+  try
+    JSON.parse(text)
+    uglify(text);
+  catch error
+    text;
+
 module.exports =
   activate: ->
     atom.commands.add 'atom-workspace',
@@ -36,3 +56,6 @@ module.exports =
       'pretty-json:sort-and-prettify': ->
         editor = atom.workspace.getActiveTextEditor()
         prettify(editor, true)
+      'pretty-json:minify': ->
+        editor = atom.workspace.getActiveTextEditor()
+        minify(editor, true)

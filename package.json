@@ -7,7 +7,9 @@
     "JSON",
     "format",
     "pretty",
-    "prettify"
+    "prettify",
+    "minify",
+    "uglify"
   ],
   "repository": "https://github.com/federomero/pretty-json",
   "license": "MIT",
@@ -15,6 +17,7 @@
     "atom": "*"
   },
   "dependencies": {
-    "json-stable-stringify": "~0.1.1"
+    "json-stable-stringify": "~0.1.1",
+    "jsonminify": "^0.2.3"
   }
 }
