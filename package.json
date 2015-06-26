@@ -1,13 +1,15 @@
 {
   "main": "./index.coffee",
   "name": "pretty-json",
-  "version": "0.3.3",
+  "version": "0.4.0",
   "description": "Format JSON",
   "keywords": [
     "JSON",
     "format",
     "pretty",
-    "prettify"
+    "prettify",
+    "minify",
+    "uglify"
   ],
   "repository": "https://github.com/federomero/pretty-json",
   "license": "MIT",
@@ -15,6 +17,8 @@
     "atom": "*"
   },
   "dependencies": {
-    "json-stable-stringify": "~0.1.1"
-  }
+    "json-stable-stringify": "~0.1.1",
+    "jsonminify": "^0.2.3"
+  },
+  "scripts": {}
 }

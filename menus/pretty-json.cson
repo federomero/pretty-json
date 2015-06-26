@@ -3,8 +3,14 @@
   'submenu': [
     'label': 'Pretty JSON'
     'submenu': [
-      'label': 'Prettify'
-      'command': 'pretty-json:prettify'
+      {
+        'label': 'Prettify'
+        'command': 'pretty-json:prettify',
+      },
+      {
+        'label': 'Minify'
+        'command': 'pretty-json:minify'
+      }
     ]
   ]
 ]
