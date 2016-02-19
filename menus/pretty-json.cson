@@ -10,6 +10,10 @@
       {
         'label': 'Minify'
         'command': 'pretty-json:minify'
+      },
+      {
+        'label': 'Sort and Prettify'
+        'command': 'pretty-json:sort-and-prettify'
       }
     ]
   ]
