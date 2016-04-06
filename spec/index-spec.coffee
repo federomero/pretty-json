@@ -7,6 +7,13 @@ describe 'Pretty JSON', ->
       atom.packages.activatePackage('pretty-json').then (pack) ->
         PrettyJSON = pack.mainModule
 
+  describe 'when prettifing large data file', ->
+    it 'does not crash', ->
+      waitsForPromise ->
+        atom.workspace.open('large.json')
+          .then (editor) ->
+            PrettyJSON.prettify editor, false
+
   describe 'when prettifing large integers', ->
     it 'does not truncate integers', ->
       waitsForPromise ->
