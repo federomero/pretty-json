@@ -1,28 +1,4 @@
-stringify = require 'json-stable-stringify'
-uglify = require 'jsonminify'
 formatter = {}
-
-prettify = (editor, sorted) ->
-  wholeFile = editor.getGrammar().name == 'JSON'
-
-  if wholeFile
-    text = editor.getText()
-    editor.setText formatter.pretty(text, sorted)
-  else
-    text = editor.replaceSelectedText({}, (text) ->
-      formatter.pretty text, sorted
-    )
-
-minify = (editor, sorted) ->
-  wholeFile = editor.getGrammar().name == 'JSON'
-
-  if wholeFile
-    text = editor.getText()
-    editor.setText formatter.minify(text)
-  else
-    text = editor.replaceSelectedText({}, (text) ->
-      formatter.minify text
-    )
 
 formatter.pretty = (text, sorted) ->
   editorSettings = atom.config.get 'editor'
@@ -34,6 +10,7 @@ formatter.pretty = (text, sorted) ->
   try
     parsed = JSON.parse(text)
     if sorted
+      stringify = require 'json-stable-stringify'
       return stringify parsed,
         space: space
     else
@@ -46,17 +23,34 @@ formatter.pretty = (text, sorted) ->
 formatter.minify = (text) ->
   try
     JSON.parse text
+    uglify = require 'jsonminify'
     uglify text
   catch error
     if atom.config.get 'pretty-json.notifyOnParseError'
       atom.notifications.addWarning "JSON Pretty parse issue: #{error}"
     text
 
+formatEntireFile = (editor) ->
+  return editor.getGrammar().name == 'JSON'
+
 module.exports =
   config:
     notifyOnParseError:
       type: 'boolean'
       default: true
+
+  prettify: (editor, sorted) ->
+    if formatEntireFile(editor)
+      editor.setText formatter.pretty(editor.getText(), sorted)
+    else
+      editor.replaceSelectedText({}, (text) -> formatter.pretty text, sorted)
+
+  minify: (editor, sorted) ->
+    if formatEntireFile(editor)
+      editor.setText formatter.minify(editor.getText())
+    else
+      editor.replaceSelectedText({}, (text) -> formatter.minify text)
+
   activate: ->
     atom.commands.add 'atom-workspace',
       'pretty-json:prettify': ->
