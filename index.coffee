@@ -1,41 +1,69 @@
 formatter = {}
-JSONbig = require 'json-bigint'
 
-formatter.pretty = (text, sorted) ->
+formatter.space = ->
   editorSettings = atom.config.get 'editor'
   if editorSettings.softTabs?
-    space = Array(editorSettings.tabLength + 1).join ' '
+    return Array(editorSettings.tabLength + 1).join ' '
   else
-    space = '\t'
+    return '\t'
 
+formatter.stringify = (obj, sorted) ->
+  # lazy load requirements
+  JSONbig = require 'json-bigint'
+  stringify = require 'json-stable-stringify'
+
+  space = formatter.space()
+  if sorted
+    return stringify obj,
+      space: space
+  else
+    return JSONbig.stringify obj, null, space
+
+formatter.parseAndValidate = (text) ->
+  JSONbig = require 'json-bigint' # lazy load requirements
+  return JSONbig.parse text
+
+formatter.pretty = (text, sorted) ->
   try
-    parsed = JSONbig.parse(text)
-    if sorted
-      stringify = require 'json-stable-stringify'
-      return stringify parsed,
-        space: space
-    else
-      return JSONbig.stringify parsed, null, space
+    space = formatter.space()
+    parsed = formatter.parseAndValidate text
+    return formatter.stringify parsed, sorted
   catch error
     if atom.config.get 'pretty-json.notifyOnParseError'
-      atom.notifications.addWarning "JSON Pretty parse issue: #{error}"
+      atom.notifications.addWarning "JSON Pretty: parse issue: #{error}"
     text
 
 formatter.minify = (text) ->
   try
-    JSONbig.parse text
-    uglify = require 'jsonminify'
+    uglify = require 'jsonminify' # lazy load requirements
+    formatter.parseAndValidate text
     uglify text
   catch error
     if atom.config.get 'pretty-json.notifyOnParseError'
-      atom.notifications.addWarning "JSON Pretty parse issue: #{error}"
+      atom.notifications.addWarning "JSON Pretty: parse issue: #{error}"
     text
 
-formatEntireFile = (editor) ->
-  grammars = atom.config.get('pretty-json.grammars') ? ['source.json']
+formatter.jsonify = (text, sorted) ->
+  try
+    vm = require 'vm' # lazy load requirements
+    vm.runInThisContext("newObject = #{text};")
+  catch error
+    if atom.config.get 'pretty-json.notifyOnParseError'
+      atom.notifications.addWarning "JSON Pretty: eval issue: #{error}"
+    text
+
+  try
+    return formatter.stringify newObject, sorted
+  catch error
+    if atom.config.get 'pretty-json.notifyOnParseError'
+      atom.notifications.addWarning "JSON Pretty: parse issue: #{error}"
+    text
+
+formatter.doEntireFile = (editor) ->
+  grammars = atom.config.get('pretty-json.grammars') ? []
   return editor.getGrammar().scopeName in grammars
 
-module.exports =
+PrettyJSON =
   config:
     notifyOnParseError:
       type: 'boolean'
@@ -45,25 +73,39 @@ module.exports =
       default: ['source.json', 'text.plain.null-grammar']
 
   prettify: (editor, sorted) ->
-    if formatEntireFile(editor)
+    if formatter.doEntireFile editor
       editor.setText formatter.pretty(editor.getText(), sorted)
     else
       editor.replaceSelectedText({}, (text) -> formatter.pretty text, sorted)
 
-  minify: (editor, sorted) ->
-    if formatEntireFile(editor)
+  minify: (editor) ->
+    if formatter.doEntireFile editor
       editor.setText formatter.minify(editor.getText())
     else
       editor.replaceSelectedText({}, (text) -> formatter.minify text)
 
+  jsonify: (editor, sorted) ->
+    if formatter.doEntireFile editor
+      editor.setText formatter.jsonify(editor.getText(), sorted)
+    else
+      editor.replaceSelectedText({}, (text) -> formatter.jsonify text)
+
   activate: ->
     atom.commands.add 'atom-workspace',
-      'pretty-json:prettify': ->
+      'pretty-json:prettify': =>
         editor = atom.workspace.getActiveTextEditor()
-        prettify editor
-      'pretty-json:sort-and-prettify': ->
+        @prettify editor, false
+      'pretty-json:minify': =>
         editor = atom.workspace.getActiveTextEditor()
-        prettify editor, true
-      'pretty-json:minify': ->
+        @minify editor
+      'pretty-json:sort-and-prettify': =>
         editor = atom.workspace.getActiveTextEditor()
-        minify editor, true
+        @prettify editor, true
+      'pretty-json:jsonify-literal-and-prettify': =>
+        editor = atom.workspace.getActiveTextEditor()
+        @jsonify editor, false
+      'pretty-json:jsonify-literal-and-sort-and-prettify': =>
+        editor = atom.workspace.getActiveTextEditor()
+        @jsonify editor, false
+
+module.exports = PrettyJSON

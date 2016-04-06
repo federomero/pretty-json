@@ -3,18 +3,19 @@ describe 'Pretty JSON', ->
 
   beforeEach ->
     waitsForPromise -> atom.packages.activatePackage('language-json')
+    waitsForPromise -> atom.packages.activatePackage('language-gfm')
     waitsForPromise ->
       atom.packages.activatePackage('pretty-json').then (pack) ->
         PrettyJSON = pack.mainModule
 
-  describe 'when prettifing large data file', ->
+  describe 'when prettifying large data file', ->
     it 'does not crash', ->
       waitsForPromise ->
         atom.workspace.open('large.json')
           .then (editor) ->
             PrettyJSON.prettify editor, false
 
-  describe 'when prettifing large integers', ->
+  describe 'when prettifying large integers', ->
     it 'does not truncate integers', ->
       waitsForPromise ->
         atom.workspace.open('bigint.json')
@@ -152,4 +153,30 @@ describe 'Pretty JSON', ->
               {"c":"d","a":"b" }
               End
 
+            """
+
+  describe 'JSON file with valid JavaScript Object Literal', ->
+    it 'jsonifies file correctly', ->
+      waitsForPromise ->
+        atom.workspace.open('object.json')
+          .then (editor) ->
+            PrettyJSON.jsonify editor, false
+            expect(editor.getText()).toBe """
+              {
+                "c": 3,
+                "a": 1
+              }
+            """
+
+  describe 'JSON file with valid JavaScript Object Literal', ->
+    it 'jsonifies and sorts file correctly', ->
+      waitsForPromise ->
+        atom.workspace.open('object.json')
+          .then (editor) ->
+            PrettyJSON.jsonify editor, true
+            expect(editor.getText()).toBe """
+              {
+                "a": 1,
+                "c": 3
+              }
             """
