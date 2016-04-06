@@ -32,13 +32,17 @@ formatter.minify = (text) ->
     text
 
 formatEntireFile = (editor) ->
-  return editor.getGrammar().name == 'JSON'
+  grammars = atom.config.get('pretty-json.grammars') ? ['source.json']
+  return editor.getGrammar().scopeName in grammars
 
 module.exports =
   config:
     notifyOnParseError:
       type: 'boolean'
       default: true
+    grammars:
+      type: 'array'
+      default: ['source.json', 'text.plain.null-grammar']
 
   prettify: (editor, sorted) ->
     if formatEntireFile(editor)
