@@ -15,7 +15,8 @@ describe 'Pretty JSON', ->
             PrettyJSON.prettify editor, false
             expect(editor.getText()).toBe """
             {
-              "foo": 6926665213734576388
+              "bigint": 6926665213734576388,
+              "float": 1.23456e-10
             }
             """
 
