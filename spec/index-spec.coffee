@@ -7,6 +7,18 @@ describe 'Pretty JSON', ->
       atom.packages.activatePackage('pretty-json').then (pack) ->
         PrettyJSON = pack.mainModule
 
+  describe 'when prettifing large integers', ->
+    it 'does not truncate integers', ->
+      waitsForPromise ->
+        atom.workspace.open('bigint.json')
+          .then (editor) ->
+            PrettyJSON.prettify editor, false
+            expect(editor.getText()).toBe """
+            {
+              "foo": 6926665213734576388
+            }
+            """
+
   describe 'when no text is selected', ->
     it 'does not change anything', ->
       waitsForPromise ->

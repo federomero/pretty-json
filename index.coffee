@@ -1,4 +1,5 @@
 formatter = {}
+JSONbig = require 'json-bigint'
 
 formatter.pretty = (text, sorted) ->
   editorSettings = atom.config.get 'editor'
@@ -8,13 +9,13 @@ formatter.pretty = (text, sorted) ->
     space = '\t'
 
   try
-    parsed = JSON.parse(text)
+    parsed = JSONbig.parse(text)
     if sorted
       stringify = require 'json-stable-stringify'
       return stringify parsed,
         space: space
     else
-      return JSON.stringify parsed, null, space
+      return JSONbig.stringify parsed, null, space
   catch error
     if atom.config.get 'pretty-json.notifyOnParseError'
       atom.notifications.addWarning "JSON Pretty parse issue: #{error}"
@@ -22,7 +23,7 @@ formatter.pretty = (text, sorted) ->
 
 formatter.minify = (text) ->
   try
-    JSON.parse text
+    JSONbig.parse text
     uglify = require 'jsonminify'
     uglify text
   catch error
