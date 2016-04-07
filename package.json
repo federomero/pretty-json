@@ -18,8 +18,8 @@
   },
   "dependencies": {
     "json-bigint": "^0.2.0",
-    "json-stable-stringify": "~0.1.1",
-    "jsonminify": "^0.2.3"
+    "json-stable-stringify": "^1.0.1",
+    "jsonminify": "^0.4.1"
   },
   "scripts": {}
 }
