@@ -106,6 +106,6 @@ PrettyJSON =
         @jsonify editor, false
       'pretty-json:jsonify-literal-and-sort-and-prettify': =>
         editor = atom.workspace.getActiveTextEditor()
-        @jsonify editor, false
+        @jsonify editor, true
 
 module.exports = PrettyJSON
