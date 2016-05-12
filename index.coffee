@@ -21,43 +21,37 @@ formatter.stringify = (obj, sorted) ->
 
 formatter.parseAndValidate = (text) ->
   JSONbig = require 'json-bigint' # lazy load requirements
-  return JSONbig.parse text
+  try
+    return JSONbig.parse text
+  catch error
+    if atom.config.get 'pretty-json.notifyOnParseError'
+      atom.notifications.addWarning "JSON Pretty: #{error.name}: #{error.message} at character #{error.at} near \"#{error.text}\""
+    throw error
 
 formatter.pretty = (text, sorted) ->
   try
-    space = formatter.space()
     parsed = formatter.parseAndValidate text
-    return formatter.stringify parsed, sorted
   catch error
-    if atom.config.get 'pretty-json.notifyOnParseError'
-      atom.notifications.addWarning "JSON Pretty: parse issue: #{error}"
-    text
+    return text
+  return formatter.stringify parsed, sorted
 
 formatter.minify = (text) ->
   try
-    uglify = require 'jsonminify' # lazy load requirements
     formatter.parseAndValidate text
-    uglify text
   catch error
-    if atom.config.get 'pretty-json.notifyOnParseError'
-      atom.notifications.addWarning "JSON Pretty: parse issue: #{error}"
-    text
+    return text
+  uglify = require 'jsonminify' # lazy load requirements
+  return uglify text
 
 formatter.jsonify = (text, sorted) ->
+  vm = require 'vm' # lazy load requirements
   try
-    vm = require 'vm' # lazy load requirements
     vm.runInThisContext("newObject = #{text};")
   catch error
     if atom.config.get 'pretty-json.notifyOnParseError'
-      atom.notifications.addWarning "JSON Pretty: eval issue: #{error}"
-    text
-
-  try
-    return formatter.stringify newObject, sorted
-  catch error
-    if atom.config.get 'pretty-json.notifyOnParseError'
-      atom.notifications.addWarning "JSON Pretty: parse issue: #{error}"
-    text
+      atom.notifications.addWarning "#{packageName}: eval issue: #{error}"
+    return text
+  return formatter.stringify newObject, sorted
 
 formatter.doEntireFile = (editor) ->
   grammars = atom.config.get('pretty-json.grammars') ? []
