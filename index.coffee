@@ -69,23 +69,31 @@ PrettyJSON =
       type: 'array'
       default: ['source.json', 'text.plain.null-grammar']
 
+  replaceText: (editor, fn) ->
+    editor.mutateSelectedText (selection) ->
+      selection.getBufferRange()
+      text = selection.getText()
+      selection.deleteSelectedText()
+      range = selection.insertText(fn(text))
+      selection.setBufferRange(range)
+
   prettify: (editor, sorted) ->
     if formatter.doEntireFile editor
       editor.setText formatter.pretty(editor.getText(), editor.getRootScopeDescriptor(), sorted)
     else
-      editor.replaceSelectedText({}, (text) -> formatter.pretty text, ['source.json'], sorted)
+      @replaceText editor, (text) -> formatter.pretty text, ['source.json'], sorted
 
   minify: (editor) ->
     if formatter.doEntireFile editor
       editor.setText formatter.minify(editor.getText())
     else
-      editor.replaceSelectedText({}, (text) -> formatter.minify text)
+      @replaceText editor, (text) -> formatter.minify text
 
   jsonify: (editor, sorted) ->
     if formatter.doEntireFile editor
       editor.setText formatter.jsonify(editor.getText(), editor.getRootScopeDescriptor(), sorted)
     else
-      editor.replaceSelectedText({}, (text) -> formatter.jsonify text['source.json'], sorted)
+      @replaceText editor, (text) -> formatter.jsonify text, ['source.json'], sorted
 
   activate: ->
     atom.commands.add 'atom-workspace',
