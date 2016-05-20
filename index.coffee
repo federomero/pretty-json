@@ -55,6 +55,8 @@ formatter.jsonify = (text, scope, sorted) ->
   return formatter.stringify newObject, scope, sorted
 
 formatter.doEntireFile = (editor) ->
+  if not editor.getLastSelection().isEmpty()
+    return false
   grammars = atom.config.get('pretty-json.grammars') ? []
   return editor.getGrammar().scopeName in grammars
 
