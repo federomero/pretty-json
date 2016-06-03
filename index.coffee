@@ -50,7 +50,7 @@ formatter.jsonify = (text, scope, sorted) ->
     vm.runInThisContext("newObject = #{text};")
   catch error
     if atom.config.get 'pretty-json.notifyOnParseError'
-      atom.notifications.addWarning "#{packageName}: eval issue: #{error}"
+      atom.notifications.addWarning "JSON Pretty: eval issue: #{error}"
     return text
   return formatter.stringify newObject, scope, sorted
 
