@@ -46,7 +46,7 @@ describe 'Pretty JSON', ->
       waitsForPromise ->
         atom.workspace.open('valid.md')
           .then (editor) ->
-            editor.setSelectedBufferRange([[1,0], [1, 22]])
+            editor.setSelectedBufferRange([[1, 0], [1, 22]])
             PrettyJSON.prettify editor, false
             expect(editor.getText()).toBe """
               Start
@@ -63,7 +63,7 @@ describe 'Pretty JSON', ->
       waitsForPromise ->
         atom.workspace.open('invalid.md')
           .then (editor) ->
-            editor.setSelectedBufferRange([[1,0], [1, 2]])
+            editor.setSelectedBufferRange([[1, 0], [1, 2]])
             PrettyJSON.prettify editor, false
             expect(editor.getText()).toBe """
             Start
@@ -146,7 +146,7 @@ describe 'Pretty JSON', ->
       waitsForPromise ->
         atom.workspace.open('valid.md')
           .then (editor) ->
-            editor.setSelectedBufferRange([[1,0], [1, 22]])
+            editor.setSelectedBufferRange([[1, 0], [1, 22]])
             PrettyJSON.minify editor, false
             expect(editor.getText()).toBe """
               Start
@@ -178,5 +178,27 @@ describe 'Pretty JSON', ->
               {
                 "a": 1,
                 "c": 3
+              }
+            """
+
+  describe 'Sort and prettify JSON file with BigNumbers', ->
+    it 'does not destroy formatting of numbers', ->
+      waitsForPromise ->
+        atom.workspace.open('stats.json')
+          .then (editor) ->
+            PrettyJSON.prettify editor, true
+            expect(editor.getText()).toBe """
+              {
+                "DV": [
+                  {
+                    "BC": 100,
+                    "Chromosome": "chr22",
+                    "PopulationFrequencyEthnicBackground": "20.316622691292874",
+                    "PopulationFrequencyGeneral": "29.716117216117215",
+                    "RQ": null,
+                    "ZW": [
+                    ]
+                  }
+                ]
               }
             """
