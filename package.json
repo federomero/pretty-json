@@ -1,7 +1,7 @@
 {
   "main": "./index.coffee",
   "name": "pretty-json",
-  "version": "1.4.3",
+  "version": "1.4.4",
   "description": "Format JSON",
   "keywords": [
     "JSON",
