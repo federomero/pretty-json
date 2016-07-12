@@ -19,8 +19,11 @@ formatter.stringify = (obj, scope, sorted) ->
     return stringify obj,
       space: space
       replacer: (key, value) ->
-        if value instanceof BigNumber
-          return JSONbig.stringify value
+        try
+          if value.constructor.name is 'BigNumber'
+            return JSONbig.stringify value
+        catch
+          # ignore
         return value
   else
     return JSONbig.stringify obj, null, space
