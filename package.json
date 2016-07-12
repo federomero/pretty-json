@@ -17,6 +17,7 @@
     "atom": "*"
   },
   "dependencies": {
+    "bignumber": "^1.1.0",
     "json-bigint": "^0.2.0",
     "json-stable-stringify": "^1.0.1",
     "jsonminify": "^0.4.1"
