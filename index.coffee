@@ -1,3 +1,4 @@
+{CompositeDisposable} = require 'atom'
 formatter = {}
 
 formatter.space = (scope) ->
@@ -63,16 +64,20 @@ formatter.jsonify = (text, scope, sorted) ->
   return formatter.stringify newObject, scope, sorted
 
 formatter.doEntireFile = (editor) ->
-  if not editor.getLastSelection().isEmpty()
-    return false
   grammars = atom.config.get('pretty-json.grammars') ? []
-  return editor.getGrammar().scopeName in grammars
+  if editor.getGrammar().scopeName not in grammars
+    return false
+  return editor.getLastSelection().isEmpty()
 
 PrettyJSON =
   config:
     notifyOnParseError:
       type: 'boolean'
       default: true
+    prettifyOnSaveJSON:
+      type: 'boolean'
+      default: false
+      title: 'Prettify On Save JSON'
     grammars:
       type: 'array'
       default: ['source.json', 'text.plain.null-grammar']
@@ -87,21 +92,30 @@ PrettyJSON =
 
   prettify: (editor, sorted) ->
     if formatter.doEntireFile editor
+      pos = editor.getCursorScreenPosition()
       editor.setText formatter.pretty(editor.getText(), editor.getRootScopeDescriptor(), sorted)
     else
+      pos = editor.getLastSelection().getScreenRange().start
       @replaceText editor, (text) -> formatter.pretty text, ['source.json'], sorted
+    editor.setCursorScreenPosition pos
 
   minify: (editor) ->
     if formatter.doEntireFile editor
+      pos = [0, 0]
       editor.setText formatter.minify(editor.getText())
     else
+      pos = editor.getLastSelection().getScreenRange().start
       @replaceText editor, (text) -> formatter.minify text
+    editor.setCursorScreenPosition pos
 
   jsonify: (editor, sorted) ->
     if formatter.doEntireFile editor
+      pos = editor.getCursorScreenPosition()
       editor.setText formatter.jsonify(editor.getText(), editor.getRootScopeDescriptor(), sorted)
     else
+      pos = editor.getLastSelection().getScreenRange().start
       @replaceText editor, (text) -> formatter.jsonify text, ['source.json'], sorted
+    editor.setCursorScreenPosition pos
 
   activate: ->
     atom.commands.add 'atom-workspace',
@@ -120,5 +134,28 @@ PrettyJSON =
       'pretty-json:jsonify-literal-and-sort-and-prettify': =>
         editor = atom.workspace.getActiveTextEditor()
         @jsonify editor, true
+
+    @subscriptions = new CompositeDisposable
+    @subscriptions.add atom.config.observe 'pretty-json.prettifyOnSaveJSON', (value) =>
+      if (@saveSubscriptions)
+        @saveSubscriptions.dispose()
+      @saveSubscriptions = new CompositeDisposable()
+      if (value)
+        @subscribeToSaveEvents()
+
+  subscribeToSaveEvents: ->
+    @saveSubscriptions.add atom.workspace.observeTextEditors (editor) =>
+      return if not editor or not editor.getBuffer()
+      bufferSubscriptions = new CompositeDisposable()
+      bufferSubscriptions.add editor.getBuffer().onWillSave (filePath) =>
+        if formatter.doEntireFile editor
+          @prettify editor, false
+      bufferSubscriptions.add editor.getBuffer().onDidDestroy ->
+        bufferSubscriptions.dispose()
+      this.saveSubscriptions.add(bufferSubscriptions)
+
+  deactivate: ->
+    @subscriptions?.dispose()
+    @subscriptions = null
 
 module.exports = PrettyJSON
