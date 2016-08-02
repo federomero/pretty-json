@@ -13,14 +13,16 @@ describe 'Pretty JSON', ->
       waitsForPromise ->
         atom.workspace.open('large.json')
           .then (editor) ->
-            PrettyJSON.prettify editor, false
+            entire = PrettyJSON.doEntireFile editor
+            PrettyJSON.prettify editor, entire, false
 
   describe 'when prettifying large integers', ->
     it 'does not truncate integers', ->
       waitsForPromise ->
         atom.workspace.open('bigint.json')
           .then (editor) ->
-            PrettyJSON.prettify editor, false
+            entire = PrettyJSON.doEntireFile editor
+            PrettyJSON.prettify editor, entire, false
             expect(editor.getText()).toBe """
             {
               "bigint": 6926665213734576388,
@@ -33,7 +35,8 @@ describe 'Pretty JSON', ->
       waitsForPromise ->
         atom.workspace.open('valid.md')
           .then (editor) ->
-            PrettyJSON.prettify editor, false
+            entire = PrettyJSON.doEntireFile editor
+            PrettyJSON.prettify editor, entire, false
             expect(editor.getText()).toBe """
               Start
               { "c": "d", "a": "b" }
@@ -47,7 +50,8 @@ describe 'Pretty JSON', ->
         atom.workspace.open('valid.md')
           .then (editor) ->
             editor.setSelectedBufferRange([[1, 0], [1, 22]])
-            PrettyJSON.prettify editor, false
+            entire = PrettyJSON.doEntireFile editor
+            PrettyJSON.prettify editor, entire, false
             expect(editor.getText()).toBe """
               Start
               {
@@ -64,7 +68,8 @@ describe 'Pretty JSON', ->
         atom.workspace.open('invalid.md')
           .then (editor) ->
             editor.setSelectedBufferRange([[1, 0], [1, 2]])
-            PrettyJSON.prettify editor, false
+            entire = PrettyJSON.doEntireFile editor
+            PrettyJSON.prettify editor, entire, false
             expect(editor.getText()).toBe """
             Start
             {]
@@ -77,7 +82,8 @@ describe 'Pretty JSON', ->
       waitsForPromise ->
         atom.workspace.open('invalid.json')
           .then (editor) ->
-            PrettyJSON.prettify editor, false
+            entire = PrettyJSON.doEntireFile editor
+            PrettyJSON.prettify editor, entire, false
             expect(editor.getText()).toBe """
             { "c": "d", "a": "b", }
 
@@ -88,7 +94,8 @@ describe 'Pretty JSON', ->
       waitsForPromise ->
         atom.workspace.open('valid.json')
           .then (editor) ->
-            PrettyJSON.prettify editor, false
+            entire = PrettyJSON.doEntireFile editor
+            PrettyJSON.prettify editor, entire, false
             expect(editor.getText()).toBe """
               {
                 "c": "d",
@@ -101,7 +108,8 @@ describe 'Pretty JSON', ->
       waitsForPromise ->
         atom.workspace.open('invalid.json')
           .then (editor) ->
-            PrettyJSON.prettify editor, true
+            entire = PrettyJSON.doEntireFile editor
+            PrettyJSON.prettify editor, entire, true
             expect(editor.getText()).toBe """
             { "c": "d", "a": "b", }
 
@@ -112,7 +120,8 @@ describe 'Pretty JSON', ->
       waitsForPromise ->
         atom.workspace.open('valid.json')
           .then (editor) ->
-            PrettyJSON.prettify editor, true
+            entire = PrettyJSON.doEntireFile editor
+            PrettyJSON.prettify editor, entire, true
             expect(editor.getText()).toBe """
               {
                 "a": "b",
@@ -125,7 +134,8 @@ describe 'Pretty JSON', ->
       waitsForPromise ->
         atom.workspace.open('invalid.json')
           .then (editor) ->
-            PrettyJSON.minify editor, false
+            entire = PrettyJSON.doEntireFile editor
+            PrettyJSON.minify editor, entire, false
             expect(editor.getText()).toBe """
             { "c": "d", "a": "b", }
 
@@ -136,7 +146,8 @@ describe 'Pretty JSON', ->
       waitsForPromise ->
         atom.workspace.open('valid.json')
           .then (editor) ->
-            PrettyJSON.minify editor, false
+            entire = PrettyJSON.doEntireFile editor
+            PrettyJSON.minify editor, entire, false
             expect(editor.getText()).toBe """
               {"c":"d","a":"b"}
             """
@@ -147,7 +158,8 @@ describe 'Pretty JSON', ->
         atom.workspace.open('valid.md')
           .then (editor) ->
             editor.setSelectedBufferRange([[1, 0], [1, 22]])
-            PrettyJSON.minify editor, false
+            entire = PrettyJSON.doEntireFile editor
+            PrettyJSON.minify editor, entire, false
             expect(editor.getText()).toBe """
               Start
               {"c":"d","a":"b" }
@@ -160,7 +172,8 @@ describe 'Pretty JSON', ->
       waitsForPromise ->
         atom.workspace.open('object.json')
           .then (editor) ->
-            PrettyJSON.jsonify editor, false
+            entire = PrettyJSON.doEntireFile editor
+            PrettyJSON.jsonify editor, entire, false
             expect(editor.getText()).toBe """
               {
                 "c": 3,
@@ -173,7 +186,8 @@ describe 'Pretty JSON', ->
       waitsForPromise ->
         atom.workspace.open('object.json')
           .then (editor) ->
-            PrettyJSON.jsonify editor, true
+            entire = PrettyJSON.doEntireFile editor
+            PrettyJSON.jsonify editor, entire, true
             expect(editor.getText()).toBe """
               {
                 "a": 1,
@@ -186,7 +200,8 @@ describe 'Pretty JSON', ->
       waitsForPromise ->
         atom.workspace.open('stats.json')
           .then (editor) ->
-            PrettyJSON.prettify editor, true
+            entire = PrettyJSON.doEntireFile editor
+            PrettyJSON.prettify editor, entire, true
             expect(editor.getText()).toBe """
               {
                 "DV": [
