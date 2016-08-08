@@ -9,7 +9,10 @@ formatter.space = (scope) ->
   else
     return '\t'
 
-formatter.stringify = (obj, scope, sorted) ->
+formatter.stringify = (obj, options) ->
+  scope = if options?.scope? then options.scope else null
+  sorted = if options?.sorted? then options.sorted else false
+
   # lazy load requirements
   JSONbig = require 'json-bigint'
   stringify = require 'json-stable-stringify'
@@ -38,12 +41,12 @@ formatter.parseAndValidate = (text) ->
       atom.notifications.addWarning "JSON Pretty: #{error.name}: #{error.message} at character #{error.at} near \"#{error.text}\""
     throw error
 
-formatter.pretty = (text, scope, sorted) ->
+formatter.pretty = (text, options) ->
   try
     parsed = formatter.parseAndValidate text
   catch error
     return text
-  return formatter.stringify parsed, scope, sorted
+  return formatter.stringify parsed, options
 
 formatter.minify = (text) ->
   try
@@ -53,7 +56,7 @@ formatter.minify = (text) ->
   uglify = require 'jsonminify' # lazy load requirements
   return uglify text
 
-formatter.jsonify = (text, scope, sorted) ->
+formatter.jsonify = (text, options) ->
   vm = require 'vm' # lazy load requirements
   try
     vm.runInThisContext "newObject = #{text};"
@@ -61,7 +64,7 @@ formatter.jsonify = (text, scope, sorted) ->
     if atom.config.get 'pretty-json.notifyOnParseError'
       atom.notifications.addWarning "JSON Pretty: eval issue: #{error}"
     return text
-  return formatter.stringify newObject, scope, sorted
+  return formatter.stringify newObject, options
 
 PrettyJSON =
   config:
@@ -90,55 +93,83 @@ PrettyJSON =
       range = selection.insertText fn text
       selection.setBufferRange range
 
-  prettify: (editor, entire, sorted) ->
+  prettify: (editor, options) ->
+    entire = if options?.entire? then options.entire else @doEntireFile editor
+    sorted = if options?.sorted? then options.sorted else false
+    selected = if options?.selected? then options.selected else true
     if entire
       pos = editor.getCursorScreenPosition()
-      editor.setText formatter.pretty editor.getText(), editor.getRootScopeDescriptor(), sorted
+      editor.setText formatter.pretty editor.getText(),
+        scope: editor.getRootScopeDescriptor()
+        sorted: sorted
     else
       pos = editor.getLastSelection().getScreenRange().start
-      @replaceText editor, (text) -> formatter.pretty text, ['source.json'], sorted
-    editor.setCursorScreenPosition pos
+      @replaceText editor, (text) -> formatter.pretty text,
+        scope: ['source.json']
+        sorted: sorted
+    unless selected
+      editor.setCursorScreenPosition pos
 
-  minify: (editor, entire) ->
+  minify: (editor, options) ->
+    entire = if options?.entire? then options.entire else @doEntireFile editor
+    selected = if options?.selected? then options.selected else true
     if entire
       pos = [0, 0]
       editor.setText formatter.minify editor.getText()
     else
       pos = editor.getLastSelection().getScreenRange().start
       @replaceText editor, (text) -> formatter.minify text
-    editor.setCursorScreenPosition pos
+    unless selected
+      editor.setCursorScreenPosition pos
 
-  jsonify: (editor, entire, sorted) ->
+  jsonify: (editor, options) ->
+    entire = if options?.entire? then options.entire else @doEntireFile editor
+    sorted = if options?.sorted? then options.sorted else false
+    selected = if options?.selected? then options.selected else true
     if entire
       pos = editor.getCursorScreenPosition()
-      editor.setText formatter.jsonify editor.getText(), editor.getRootScopeDescriptor(), sorted
+      editor.setText formatter.jsonify editor.getText(),
+        scope: editor.getRootScopeDescriptor()
+        sorted: sorted
     else
       pos = editor.getLastSelection().getScreenRange().start
-      @replaceText editor, (text) -> formatter.jsonify text, ['source.json'], sorted
-    editor.setCursorScreenPosition pos
+      @replaceText editor, (text) -> formatter.jsonify text,
+        scope: ['source.json']
+        sorted: sorted
+    unless selected
+      editor.setCursorScreenPosition pos
 
   activate: ->
     atom.commands.add 'atom-workspace',
       'pretty-json:prettify': =>
         editor = atom.workspace.getActiveTextEditor()
-        entire = @doEntireFile editor
-        @prettify editor, entire, false
+        @prettify editor,
+          entire: @doEntireFile editor
+          sorted: false
+          selected: true
       'pretty-json:minify': =>
         editor = atom.workspace.getActiveTextEditor()
-        entire = @doEntireFile editor
-        @minify editor, entire
+        @minify editor,
+          entire: @doEntireFile editor
+          selected: true
       'pretty-json:sort-and-prettify': =>
         editor = atom.workspace.getActiveTextEditor()
-        entire = @doEntireFile editor
-        @prettify editor, entire, true
+        @prettify editor,
+          entire: @doEntireFile editor
+          sorted: true
+          selected: true
       'pretty-json:jsonify-literal-and-prettify': =>
         editor = atom.workspace.getActiveTextEditor()
-        entire = @doEntireFile editor
-        @jsonify editor, entire, false
+        @jsonify editor,
+          entire: @doEntireFile editor
+          sorted: false
+          selected: true
       'pretty-json:jsonify-literal-and-sort-and-prettify': =>
         editor = atom.workspace.getActiveTextEditor()
-        entire = @doEntireFile editor
-        @jsonify editor, entire, true
+        @jsonify editor,
+          entire: @doEntireFile editor
+          sorted: true
+          selected: true
 
     @subscriptions = new CompositeDisposable
     @subscriptions.add atom.config.observe 'pretty-json.prettifyOnSaveJSON', (value) =>
@@ -152,9 +183,11 @@ PrettyJSON =
       return if not editor?.getBuffer()
       bufferSubscriptions = new CompositeDisposable()
       bufferSubscriptions.add editor.getBuffer().onWillSave (filePath) =>
-        entire = @doEntireFile editor
-        if entire
-          @prettify editor, entire, false
+        if @doEntireFile editor
+          @prettify editor,
+            entire: true
+            sorted: false
+            selected: false
       bufferSubscriptions.add editor.getBuffer().onDidDestroy ->
         bufferSubscriptions.dispose()
       @saveSubscriptions.add bufferSubscriptions
