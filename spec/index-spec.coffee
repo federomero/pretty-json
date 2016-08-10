@@ -214,3 +214,27 @@ describe 'Pretty JSON', ->
                 ]
               }
             """
+
+  describe 'when a valid json text is selected', ->
+    it 'formats it correctly, and selects the formatted text', ->
+      waitsForPromise ->
+        atom.workspace.open('selected.json')
+          .then (editor) ->
+            editor.setSelectedBufferRange([[0, 0], [0, 32]])
+            PrettyJSON.prettify editor,
+              sorted: false
+            expect(editor.getText()).toBe """
+              {
+                "key": {
+                  "key": {
+                    "key": "value"
+                  }
+                }
+              }
+
+            """
+            range = editor.getSelectedBufferRange()
+            expect(range.start.row).toBe 0
+            expect(range.start.column).toBe 0
+            expect(range.end.row).toBe 6
+            expect(range.end.column).toBe 1
