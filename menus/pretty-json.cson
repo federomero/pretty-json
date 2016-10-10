@@ -16,11 +16,11 @@
         'command': 'pretty-json:sort-and-prettify'
       },
       {
-        'label': 'JSONify JavsScript Object Literal and Prettify'
+        'label': 'JSONify JavaScript Object Literal and Prettify'
         'command': 'pretty-json:jsonify-literal-and-prettify'
       },
       {
-        'label': 'JSONify JavsScript Object Literal and Sort and Prettify'
+        'label': 'JSONify JavaScript Object Literal and Sort and Prettify'
         'command': 'pretty-json:jsonify-literal-and-sort-and-prettify'
       }
     ]
