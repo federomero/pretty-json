@@ -94,6 +94,7 @@ PrettyJSON =
       selection.setBufferRange range
 
   prettify: (editor, options) ->
+    return unless editor?
     entire = if options?.entire? then options.entire else @doEntireFile editor
     sorted = if options?.sorted? then options.sorted else false
     selected = if options?.selected? then options.selected else true
