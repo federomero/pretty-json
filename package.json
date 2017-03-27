@@ -17,8 +17,8 @@
     "atom": "*"
   },
   "dependencies": {
-    "bignumber.js": "^2.3.0",
-    "json-bigint": "^0.2.0",
+    "bignumber.js": "^2.4.0",
+    "json-bigint": "^0.2.3",
     "json-stable-stringify": "^1.0.1",
     "jsonminify": "^0.4.1"
   },
