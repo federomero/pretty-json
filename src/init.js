@@ -22,7 +22,10 @@ const PrettyJSON = {
 
   doEntireFile (editor) {
     const grammars = atom.config.get('pretty-json.grammars')
-    if (grammars === undefined || !grammars.includes(editor.getGrammar().scopeName)) {
+    if (grammars === undefined || !editor) {
+      return false
+    }
+    if (!grammars.includes(editor.getGrammar().scopeName)) {
       return false
     }
     return editor.getLastSelection().isEmpty()
