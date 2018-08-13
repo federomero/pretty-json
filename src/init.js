@@ -3,6 +3,22 @@
 import * as formatter from './formatter'
 const {CompositeDisposable} = require('atom')
 
+function isOption(option, options, fallback) {
+  return options && typeof options[option] !== 'undefined' ? options[option] : fallback()
+}
+
+function isEntire(options, fallback) {
+  return isOption('entire', options, fallback)
+}
+
+function isSelected(options, fallback) {
+  return isOption('selected', options, fallback)
+}
+
+function isSorted(options, fallback) {
+  return isOption('sorted', options, fallback)
+}
+
 const PrettyJSON = {
   config: {
     notifyOnParseError: {
@@ -20,14 +36,13 @@ const PrettyJSON = {
     }
   },
 
-  doEntireFile (editor) {
+  doEntireFile (editor, save = false) {
+    // don't allow prettify-on-save for null grammar; causes too many false positives
+    if (save && editor.getGrammar().scopeName === 'text.plain.null-grammar') return false
+
     const grammars = atom.config.get('pretty-json.grammars')
-    if (grammars === undefined || !editor) {
-      return false
-    }
-    if (!grammars.includes(editor.getGrammar().scopeName)) {
-      return false
-    }
+    if (typeof grammars === 'undefined' || !editor) return false
+    if (!grammars.includes(editor.getGrammar().scopeName)) return false
     return editor.getLastSelection().isEmpty()
   },
 
@@ -42,11 +57,11 @@ const PrettyJSON = {
   },
 
   prettify (editor, options) {
-    if (editor == null) { return }
+    if (!editor) return
     let pos
-    const entire = ((options != null ? options.entire : undefined) != null) ? options.entire : this.doEntireFile(editor)
-    const sorted = ((options != null ? options.sorted : undefined) != null) ? options.sorted : false
-    const selected = ((options != null ? options.selected : undefined) != null) ? options.selected : true
+    const entire = isEntire(options, () => this.doEntireFile(editor))
+    const sorted = isSorted(options, () => true)
+    const selected = isSelected(options, () => true)
     if (entire) {
       pos = editor.getCursorScreenPosition()
       editor.setText(
@@ -69,8 +84,8 @@ const PrettyJSON = {
 
   minify (editor, options) {
     let pos
-    const entire = ((options != null ? options.entire : undefined) != null) ? options.entire : this.doEntireFile(editor)
-    const selected = ((options != null ? options.selected : undefined) != null) ? options.selected : true
+    const entire = isEntire(options, () => this.doEntireFile(editor))
+    const selected = isSelected(options, () => true)
     if (entire) {
       pos = [0, 0]
       editor.setText(formatter.minify(editor.getText()))
@@ -85,9 +100,9 @@ const PrettyJSON = {
 
   jsonify (editor, options) {
     let pos
-    const entire = ((options != null ? options.entire : undefined) != null) ? options.entire : this.doEntireFile(editor)
-    const sorted = ((options != null ? options.sorted : undefined) != null) ? options.sorted : false
-    const selected = ((options != null ? options.selected : undefined) != null) ? options.selected : true
+    const entire = isEntire(options, () => this.doEntireFile(editor))
+    const sorted = isSorted(options, () => false)
+    const selected = isSelected(options, () => true)
     if (entire) {
       pos = editor.getCursorScreenPosition()
       editor.setText(formatter.jsonify(editor.getText(), {
@@ -166,7 +181,7 @@ const PrettyJSON = {
       if (!(editor != null ? editor.getBuffer() : undefined)) { return }
       const bufferSubscriptions = new CompositeDisposable()
       bufferSubscriptions.add(editor.getBuffer().onWillSave(filePath => {
-        if (this.doEntireFile(editor)) {
+        if (this.doEntireFile(editor, true)) {
           return this.prettify(editor, {
             entire: true,
             sorted: false,
