@@ -6,5 +6,9 @@ module.exports = {
   ],
   'globals': {
     'atom': true
+  },
+  'env': {
+    'jasmine': true,
+    'atomtest': true
   }
 }

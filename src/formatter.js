@@ -2,8 +2,8 @@
 
 const formatter = {
   space (scope) {
-    const softTabs = atom.config.get('editor.softTabs', {scope})
-    const tabLength = Number([atom.config.get('editor.tabLength', {scope})])
+    const softTabs = atom.config.get('editor.softTabs', { scope })
+    const tabLength = Number([atom.config.get('editor.tabLength', { scope })])
     if (softTabs != null) {
       return Array(tabLength + 1).join(' ')
     } else {

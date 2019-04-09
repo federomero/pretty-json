@@ -1,7 +1,7 @@
 /** @babel */
 
 import * as formatter from './formatter'
-const {CompositeDisposable} = require('atom')
+const { CompositeDisposable } = require('atom')
 
 function isOption (option, options, fallback) {
   return options && typeof options[option] !== 'undefined' ? options[option] : fallback()
