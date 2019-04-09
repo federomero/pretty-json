@@ -3,19 +3,19 @@
 import * as formatter from './formatter'
 const {CompositeDisposable} = require('atom')
 
-function isOption(option, options, fallback) {
+function isOption (option, options, fallback) {
   return options && typeof options[option] !== 'undefined' ? options[option] : fallback()
 }
 
-function isEntire(options, fallback) {
+function isEntire (options, fallback) {
   return isOption('entire', options, fallback)
 }
 
-function isSelected(options, fallback) {
+function isSelected (options, fallback) {
   return isOption('selected', options, fallback)
 }
 
-function isSorted(options, fallback) {
+function isSorted (options, fallback) {
   return isOption('sorted', options, fallback)
 }
 
